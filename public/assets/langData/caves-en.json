@@ -1,0 +1,143 @@
+﻿{
+  "Spellcave": {
+    "WordLengthExtraMoves": [ 7, 10, 13, 16 ]
+  },
+  "Experiment1": {
+      "Name": "Experiment 1",
+      "InitialMoves": 3,
+      "MovesPerLayer": 3,
+      "ResetMovesPerLayer": true,
+      "WordLengthExtraMoves": [ 7, 10, 13, 16, 19, 22, 25, 28, 31 ],
+      "LayerLengths": [ 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40 ],
+      "LayerInfoStart": {
+          "Line": 5,
+          "TokenFreq": {
+              "^h": [ 8, 16 ],
+              "^w": [ 16, 32 ]
+          }
+      },
+      "LayerInfoEnd": {
+          "Line": 200,
+          "TokenFreq": {
+              "^h": [ 16, 32 ],
+              "^w": [ 32, 64 ]
+          }
+      }
+  },
+  "Experiment3": {
+    "Name": "Experiment 3",
+    "InitialMoves": 3,
+    "LayerLengths": [ 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, 63, 66, 69, 72, 75, 78, 81, 84, 87, 90, 93, 96, 99 ],
+    "LayerInfoStart": {
+      "Line": 5,
+      "TokenFreq": {
+        "^h": [ 8, 16 ]
+      }
+    },
+    "LayerInfoEnd": {
+      "Line": 200,
+      "TokenFreq": {
+        "^h": [ 16, 32 ]
+      }
+    },
+    "MovesPerLayer": 3,
+    "MinimumLayerForExtraTokens": 1
+  },
+  "Experiment3b": {
+    "Name": "Experiment 3b",
+    "InitialMoves": 3,
+    "LayerLengths": [ 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96 ],
+    "LayerInfoStart": {
+      "Line": 5,
+      "TokenFreq": {
+        "^h": [ 8, 16 ],
+        "^w": [ 16, 32 ]
+      }
+    },
+    "LayerInfoEnd": {
+      "Line": 200,
+      "TokenFreq": {
+        "^h": [ 16, 32 ],
+        "^w": [ 32, 64 ]
+      }
+    },
+    "MovesPerLayer": 3
+  },
+  "Experiment4": {
+    "Name": "Experiment 4",
+    "InitialMoves": 3,
+    "LayerLines": [ 6, 18, 42, 76, 126, 186, 258, 342, 438, 546, 666 ],
+    "ExtraTokenProbs": {
+      "*": 0,
+      "^h": 0,
+      "^m": 0
+    },
+    "LayerInfoStart": {
+        "Line": 5,
+        "TokenFreq": {
+            "^h": [ 3, 11 ]
+        },
+        "SpellstoneFreq": {
+            "Min": 4,
+            "Avg": 8,
+            "Max": 12
+        }
+    },
+    "LayerInfoEnd": {
+      "Line": 300,
+      "TokenFreq": {
+        "^h": [ 5, 13 ]
+      }
+    },
+    "MovesPerLayer": 3
+  },
+  "Basic7": {
+    "Name": "Basic 7",
+    "WordLengthExtraMoves": [ 7, 10, 13, 16, 19, 22, 25, 28, 31 ]
+  },
+  "Narrow7": {
+    "Name": "Narrowing 7",
+    "WordLengthExtraMoves": [ 7, 10, 13, 16, 19, 22, 25, 28, 31 ],
+    "LayerInfoStart": {
+      "Width": [1, 1.5]
+    },
+    "LayerInfoEnd": {
+      "Width": [ 0.1, 0.2 ]
+    }
+  },
+  "Narrow_Rocks7": {
+    "Name": "Narrowing + Rocks 7",
+    "WordLengthExtraMoves": [ 7, 10, 13, 16, 19, 22, 25, 28, 31 ],
+    "LayerInfoStart": {
+      "Width": [ 1, 1.5 ],
+      "Rocks": 0.1
+    },
+    "RandomLayerEnd": {
+      "Width": [ 0.1, 0.2 ],
+      "Rocks": 1
+    }
+  },
+  "Narrow_Bombs7": {
+    "Name": "Narrowing + Bombs 7",
+    "WordLengthExtraMoves": [ 7, 10, 13, 16, 19, 22, 25, 28, 31 ],
+    "ExtraTokenProbs": {
+      "^b": 0.0075
+    },
+    "LayerInfoStart": {
+      "Width": [ 1, 1.5 ]
+    },
+    "LayerInfoEnd": {
+      "Width": [ 0.1, 0.2 ]
+    }
+  },
+  "Basic": {
+    "Name": "Basic 8"
+  },
+
+	"Seed1": {
+		"//Ignore": true,
+		"Name": "Non-Random",
+		"Seed": 1276157265,
+		"//Seed": 127615726553453453
+	}
+}

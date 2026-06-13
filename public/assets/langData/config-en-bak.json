@@ -1,0 +1,63 @@
+{
+	"Tokens": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ],
+	"GameTokens": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Qu", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ],
+	"MinimumWord": 2,
+	"WildcardToken": "*",
+	"ExtraTokenProbs": {
+	},
+	"TokenBonusMoves": {
+    "Qu": 1,
+    "X": 1,
+    "Z": 1,
+    "J": 1
+	},
+  "TokenGroups": [
+    [ "S", "N", "I", "O", "A", "T", "E", "R" ],
+    [ "U", "M", "C", "L", "D", "H", "B" ],
+    [ "P", "G", "W", "Y", "F", "V", "K" ],
+    [ "J", "X", "Z", "Qu" ]
+  ],
+	"LayerLines": [ 5 ],
+  "LayerInfoStart": {
+    "Line": 5,
+    "Length": { "Min": 2, "Max": 10 },
+    "TokenRandom": 0,
+    "TokenFreq": {
+      "*": { "Min": 1, "Avg": 8, "Max": 10 },
+      "^h": { "Min": 3, "Avg": 7, "Max": 11 },
+      "^m": { "Min": 2, "Avg": 6, "Max": 12 }
+    }
+  },
+  "LayerInfoEnd": {
+    "line": 200,
+    "Length": { "Min": 2, "Max": 20, "Avg": 15 },
+    "TokenRandom": 0.5,
+    "TokenFreq": {
+      "*": { "Min": 5, "Avg": 12, "Max": 15 },
+      "^h": { "Min": 5, "Avg": 9, "Max": 13 },
+      "^m": { "Min": 2, "Avg": 15, "Max": 20 }
+    }
+  },
+  "MinimumLayerForExtraTokens": 1,
+	"WordLengthExtraMoves": [ 8, 12, 16, 20, 24 ],
+	"InitialMoves": 5,
+	"InitialHints": 10,
+	"HintsPerPowerUp": 3,
+    "MovesPerLayer": 1,
+	"MaxWildcardsPerWord": 2,
+	"HintLengthForColorUpgrade": 5,
+
+  "Fossils":
+  {
+    "List":
+    {
+      "FOSSIL1": { "MinLayer": 1, "MaxLayer": 2, "Weight": 1 },
+      "FOSSIL2": { "MinLayer": 1, "MaxLayer": 2, "Weight": 1 },
+      "FOSSIL3": { "MinLayer": 3, "MaxLayer": 4, "Weight": 1 },
+      "FOSSIL4": { "MinLayer": 3, "MaxLayer": 4, "Weight": 1 },
+      "FOSSIL5": { "MinLayer": 5, "MaxLayer": 100, "Weight": 1 }
+    },
+    "FossilsMinLayerDist": 2,
+    "FossilsMaxLayerDist": 4
+  }
+}

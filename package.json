@@ -1,0 +1,36 @@
+{
+  "name": "spellcave-web",
+  "description": "Spellcave — pure HTML/React (no Phaser). Type your way down an infinite cave.",
+  "version": "0.0.1",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itayke/spellcave.git"
+  },
+  "author": "Itay Keren <itay@untame.com> (https://untame.com/itay)",
+  "homepage": "https://untame.com/",
+  "keywords": [
+    "spell",
+    "cave",
+    "word",
+    "game",
+    "react",
+    "vite",
+    "html"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "harness": "node harness/parity.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.3.1"
+  }
+}

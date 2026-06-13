@@ -1,0 +1,17 @@
+﻿{
+	"Tokens": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ],
+	"GameTokens": [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Qu", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" ],
+	"MinimumWord": 2,
+	"WildcardToken": "?",
+	"TokenGroups": [
+		[],
+		[ "J", "X", "Z", "Qu" ]
+  ],
+	"TokenGroups_": [
+		[],
+		[ "R", "I", "A", "S", "E", "N", "T", "O", "L" ],
+		[ "C", "D", "U", "M", "G", "P", "H", "B" ],
+		[ "F", "W", "Y", "V", "K" ],
+		[ "J", "X", "Z", "Qu" ]
+  ]
+}
