@@ -8,12 +8,15 @@
 // mismatch means the port changed behavior. Exit code is non-zero on any difference.
 
 import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { generateGolden } from './golden.mjs';
+import { generateSquareGolden } from './square-golden.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const NEW_ROOT = path.resolve(here, '..');                       // spellcave-web
 const OLD_ROOT = path.resolve(NEW_ROOT, '..', 'spellcave');      // current Phaser repo
+const SQUARE_GOLDEN_FILE = path.join(here, 'square-golden.json'); // committed self-golden baseline
 
 const engines = {
   new:     { dir: path.join(NEW_ROOT, 'src', 'engine'), root: NEW_ROOT },
@@ -54,18 +57,45 @@ async function main() {
   console.log('Sample random words   :', fresh.randomWords.slice(0, 6).join(', '));
   console.log('Sample token chain    :', fresh.extraProbChain.slice(0, 12).join(''));
 
-  if (match) {
-    console.log('\n✅ PARITY PASS — ported engine is byte-identical to the current engine for the fixed seed.');
+  if (!match) {
+    const diff = firstDiff(fresh, current);
+    console.error('\n❌ PARITY FAIL — outputs diverge.');
+    if (diff) {
+      console.error(`First differing key: "${diff.key}"`);
+      console.error('  new    :', canonical(diff.new).slice(0, 400));
+      console.error('  current:', canonical(diff.current).slice(0, 400));
+    }
+    process.exit(1);
+  }
+  console.log('\n✅ PARITY PASS — ported engine is byte-identical to the current engine for the fixed seed.');
+
+  // New-engine self-golden for the de-Phasered Square (Phase 2). No old-side counterpart — the
+  // old Square needs Phaser — so this locks the ported Square's behavior against a committed
+  // baseline instead of cross-comparing. See harness/square-golden.mjs.
+  console.log('\nGenerating Square self-golden (new engine)...');
+  const square = await generateSquareGolden(engines.new.dir, engines.new.root);
+
+  if (!existsSync(SQUARE_GOLDEN_FILE)) {
+    writeFileSync(SQUARE_GOLDEN_FILE, canonical(square) + '\n');
+    console.log(`📝 SQUARE GOLDEN BASELINE WRITTEN — ${path.relative(NEW_ROOT, SQUARE_GOLDEN_FILE)} (review & commit it).`);
     process.exit(0);
   }
 
-  const diff = firstDiff(fresh, current);
-  console.error('\n❌ PARITY FAIL — outputs diverge.');
-  if (diff) {
-    console.error(`First differing key: "${diff.key}"`);
-    console.error('  new    :', canonical(diff.new).slice(0, 400));
-    console.error('  current:', canonical(diff.current).slice(0, 400));
+  const baseline = readFileSync(SQUARE_GOLDEN_FILE, 'utf8').trim();
+  if (canonical(square) === baseline) {
+    console.log('✅ SQUARE GOLDEN PASS — ported Square snapshots match the committed baseline.');
+    process.exit(0);
   }
+
+  const baselineObj = JSON.parse(baseline);
+  const sqDiff = firstDiff(square, baselineObj);
+  console.error('\n❌ SQUARE GOLDEN FAIL — ported Square snapshots changed.');
+  if (sqDiff) {
+    console.error(`First differing key: "${sqDiff.key}"`);
+    console.error('  new     :', canonical(sqDiff.new).slice(0, 400));
+    console.error('  baseline:', canonical(sqDiff.current).slice(0, 400));
+  }
+  console.error('\nIf this change is intentional, delete the baseline and re-run to regenerate it.');
   process.exit(1);
 }
 
