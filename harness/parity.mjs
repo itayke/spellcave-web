@@ -12,11 +12,13 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { generateGolden } from './golden.mjs';
 import { generateSquareGolden } from './square-golden.mjs';
+import { generateCaveGolden } from './cave-golden.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const NEW_ROOT = path.resolve(here, '..');                       // spellcave-web
 const OLD_ROOT = path.resolve(NEW_ROOT, '..', 'spellcave');      // current Phaser repo
 const SQUARE_GOLDEN_FILE = path.join(here, 'square-golden.json'); // committed self-golden baseline
+const CAVE_GOLDEN_FILE = path.join(here, 'cave-golden.json');     // committed self-golden baseline
 
 const engines = {
   new:     { dir: path.join(NEW_ROOT, 'src', 'engine'), root: NEW_ROOT },
@@ -69,34 +71,45 @@ async function main() {
   }
   console.log('\n✅ PARITY PASS — ported engine is byte-identical to the current engine for the fixed seed.');
 
-  // New-engine self-golden for the de-Phasered Square (Phase 2). No old-side counterpart — the
-  // old Square needs Phaser — so this locks the ported Square's behavior against a committed
-  // baseline instead of cross-comparing. See harness/square-golden.mjs.
-  console.log('\nGenerating Square self-golden (new engine)...');
-  const square = await generateSquareGolden(engines.new.dir, engines.new.root);
+  // New-engine self-goldens for the de-Phasered model (Phase 2). These have no old-side
+  // counterpart — the old Square/Cave extend Phaser.GameObjects.Container and can't run headless —
+  // so they lock the ported behavior against a committed baseline instead of cross-comparing.
+  const okSquare = await checkSelfGolden('SQUARE', SQUARE_GOLDEN_FILE,
+    () => generateSquareGolden(engines.new.dir, engines.new.root));
+  const okCave = await checkSelfGolden('CAVE', CAVE_GOLDEN_FILE,
+    () => generateCaveGolden(engines.new.dir, engines.new.root));
 
-  if (!existsSync(SQUARE_GOLDEN_FILE)) {
-    writeFileSync(SQUARE_GOLDEN_FILE, canonical(square) + '\n');
-    console.log(`📝 SQUARE GOLDEN BASELINE WRITTEN — ${path.relative(NEW_ROOT, SQUARE_GOLDEN_FILE)} (review & commit it).`);
-    process.exit(0);
+  process.exit(okSquare && okCave ? 0 : 1);
+}
+
+// Generate a new-engine self-golden and compare to its committed baseline (writing the baseline
+// on first run). Returns true on pass / freshly-written baseline, false on mismatch.
+async function checkSelfGolden(name, file, generateFn) {
+  console.log(`\nGenerating ${name} self-golden (new engine)...`);
+  const result = await generateFn();
+  const rel = path.relative(NEW_ROOT, file);
+
+  if (!existsSync(file)) {
+    writeFileSync(file, canonical(result) + '\n');
+    console.log(`📝 ${name} GOLDEN BASELINE WRITTEN — ${rel} (review & commit it).`);
+    return true;
   }
 
-  const baseline = readFileSync(SQUARE_GOLDEN_FILE, 'utf8').trim();
-  if (canonical(square) === baseline) {
-    console.log('✅ SQUARE GOLDEN PASS — ported Square snapshots match the committed baseline.');
-    process.exit(0);
+  const baseline = readFileSync(file, 'utf8').trim();
+  if (canonical(result) === baseline) {
+    console.log(`✅ ${name} GOLDEN PASS — ported snapshots match the committed baseline.`);
+    return true;
   }
 
-  const baselineObj = JSON.parse(baseline);
-  const sqDiff = firstDiff(square, baselineObj);
-  console.error('\n❌ SQUARE GOLDEN FAIL — ported Square snapshots changed.');
-  if (sqDiff) {
-    console.error(`First differing key: "${sqDiff.key}"`);
-    console.error('  new     :', canonical(sqDiff.new).slice(0, 400));
-    console.error('  baseline:', canonical(sqDiff.current).slice(0, 400));
+  const diff = firstDiff(result, JSON.parse(baseline));
+  console.error(`\n❌ ${name} GOLDEN FAIL — ported snapshots changed.`);
+  if (diff) {
+    console.error(`First differing key: "${diff.key}"`);
+    console.error('  new     :', canonical(diff.new).slice(0, 400));
+    console.error('  baseline:', canonical(diff.current).slice(0, 400));
   }
-  console.error('\nIf this change is intentional, delete the baseline and re-run to regenerate it.');
-  process.exit(1);
+  console.error(`If this change is intentional, delete ${rel} and re-run to regenerate it.`);
+  return false;
 }
 
 main().catch(err => {
