@@ -1,4 +1,12 @@
-import fs from 'fs/promises';
+// `fs/promises` is only touched by the Node-side paths: the offline file reads used by the parity
+// harness and the dev-only tree export. It is imported lazily so this module can be bundled for the
+// browser (Vite), where only the `fetch` code path runs and a top-level node builtin would break.
+let _fsPromise;
+// The specifier is held in a variable + @vite-ignore so Vite skips static analysis of this import
+// and won't externalize the Node builtin (which would warn) — the browser bundle never reaches it;
+// only the offline/export paths, run under Node, call loadFs().
+const FS_MODULE = 'node:fs/promises';
+const loadFs = () => (_fsPromise ??= import(/* @vite-ignore */ FS_MODULE));
 
 export default class LanguageTree {
 
@@ -708,6 +716,7 @@ export default class LanguageTree {
   // Read text file as JSON, online (default) or offline
   static async readFileJSON(filepath, offline) {
     if (offline) {
+      const fs = await loadFs();
       const configContent = await fs.readFile(`${LanguageTree.OfflineFileRootPath}${LanguageTree.LangDataFilePath}${filepath}`, 'utf-8');
       return JSON.parse(LanguageTree.stripBOM(configContent));
     }
@@ -722,6 +731,7 @@ export default class LanguageTree {
     // Read text file, online (default) or offline
   static async readFile(filepath, offline) {
     if (offline) {
+      const fs = await loadFs();
       const configContent = await fs.readFile(`${LanguageTree.OfflineFileRootPath}${LanguageTree.LangDataFilePath}${filepath}`, 'utf-8');
       return LanguageTree.stripBOM(configContent);
     }
@@ -814,6 +824,8 @@ export default class LanguageTree {
 
       // Process words and create tree
       const { numWords, treeData, probabilities } = await LanguageTree.processWords(LanguageTree.stripBOM(wordsContent), langInstance);
+
+      const fs = await loadFs();
 
       // Save tree file
       await fs.writeFile(`${LanguageTree.OfflineFileRootPath}${LanguageTree.LangDataFilePath}${LanguageTree.LangTreeFilePrefix}${langCode}.txt`, treeData);

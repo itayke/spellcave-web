@@ -6,8 +6,20 @@ The game renders as DOM + CSS (mask-image tints, transforms, Web Animations API)
 
 ## Status
 
-Phases 1–2 complete — the entire engine + model are ported and Phaser-free.
+Phases 1–3 complete — the engine is ported and Phaser-free, and a Zustand store now drives a live
+(provisional) React view from engine snapshots in the browser.
 
+- `src/store/` — **(Phase 3)** the Zustand bridge replacing the Phaser EventBus. `gameStore.js`
+  boots the engine in the browser (loads language data over `fetch`, sizes the 7-column grid to the
+  viewport, constructs the `Cave` with `window.localStorage` and a real `ui`), holds the immutable
+  `snapshot`, and exposes intents (`tapSquare`, `clearSelection`) that call the engine then
+  republish. `uiBridge.js` is the object installed as `cave.ui` (replacing the engine's internal
+  no-op proxy): a recursive proxy that absorbs the engine's imperative view calls and coalesces them
+  into one snapshot publish per microtask, covering the async engine→view flows.
+- `src/App.jsx` — **(Phase 3)** a provisional React view: boots the store on mount and renders the
+  generated cave (positioned `<div>`s, level lines, HUD) straight from `snapshot`; tapping a square
+  routes an intent back through the store. Plain inline styles — the faithful CSS-masked components
+  move to `src/view/` in Phase 4.
 - `src/engine/` — pure-logic engine + de-Phasered model, ported from the Phaser repo:
   - `LanguageTree.js`, `HashManager.js`, `CaveData.js` — copied verbatim.
   - `GameConstants.js` — Phaser `Color.ValueToColor(...)` objects rewritten as CSS hex strings.
@@ -24,15 +36,18 @@ Phases 1–2 complete — the entire engine + model are ported and Phaser-free.
     `cave.ui` (a recursive no-op proxy until the real UI lands), `cave.storage` (injectable,
     in-memory by default, replacing `localStorage`), and `cave.scrollY` (plain state replacing
     the Phaser container offset; animation moves to the view). Exposes `getSnapshot()`.
-- `src/view/`, `src/store/` — empty, filled in later phases.
+  - `LanguageTree.js` — its Node-only `fs/promises` use (offline reads + dev tree export) is now a
+    lazy dynamic import, so the engine bundles cleanly for the browser (the browser only runs the
+    `fetch` path).
+- `src/view/` — empty until Phase 4 (the provisional view currently lives in `App.jsx`).
 
 **Deferred on purpose** (tracked in the migration plan): raw pointer/wheel input + swipe
-hit-testing → Phase 5; image/tween rendering → Phase 4/6; `{COLOR=n}` word styling → Phase 4.
+hit-testing → Phase 5; CSS-masked sprite rendering + tweens → Phase 4/6; `{COLOR=n}` word
+styling → Phase 4.
 
-**Next: Phase 3** — Zustand store bridging engine ↔ React (replacing the Phaser EventBus), a React
-root rendering the cave from `cave.getSnapshot()`, a real `ui` object + `window.localStorage`
-wired onto the Cave. (Also pending from Phase 1: make `LanguageTree.js`'s top-level
-`import fs from 'fs/promises'` a dynamic import before the engine is imported in the browser build.)
+**Next: Phase 4 — view components.** Replace the provisional `App.jsx` rendering with real
+`<Square>` / `<Connector>` / UI-screen components as CSS-masked DOM in `src/view/`, plus `{COLOR=n}`
+word styling.
 
 ## Scripts
 
