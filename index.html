@@ -4,9 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Spellcave</title>
+    <!-- Web-font stand-ins for the Phaser bitmap fonts (see MIGRATION_PLAN.md): Pathway Gothic One
+         is the SquareToken font (grid letters + the typed word); Poppins substitutes for the
+         Daikon-Medium UIText (stats / button labels / bonus tags), which has no web TTF. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <style>
       html, body, #root { margin: 0; padding: 0; height: 100%; background: #000; }
       * { box-sizing: border-box; }
+      :root {
+        --font-token: 'Pathway Gothic One', 'Oswald', sans-serif; /* grid tokens + typed word */
+        --font-ui: 'Poppins', system-ui, sans-serif;             /* stats, buttons, bonus tags */
+      }
+      /* No text selection / tap-highlight in the game surface. */
+      #root { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
     </style>
   </head>
   <body>

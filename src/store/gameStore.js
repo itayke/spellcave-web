@@ -70,6 +70,14 @@ export const useGameStore = create((set, get) => ({
       });
       cave.initialize(ui, false);
 
+      // startGame() kicks off the first move + the async available-words search (sets
+      // readyForInput, which gates dig/hint). The UI bridge already publishes on the synchronous
+      // ui.* calls; we await the same search and republish so readyForInput is accurate in the
+      // first ready snapshot.
+      cave.startGame();
+      await cave.checkAvailableWords();
+      cave.readyForInput = true;
+
       set({
         status: 'ready',
         squareSize,
@@ -114,5 +122,30 @@ export const useGameStore = create((set, get) => ({
       cave.selectSquare(head, false); // pop the head itself
     }
     get().publish();
+  },
+
+  // Dig the currently typed word (no-op unless it's valid — the engine guards). Decrements moves,
+  // advances the level, and kicks off the async finalize/refill (which republishes via the bridge).
+  digWord() {
+    if (!cave) return;
+    if (!cave.readyForInput || !cave.typedWordValid) return;
+    cave.digWord();
+    get().publish();
+  },
+
+  // Spend a hint: reveal the next best word's squares (engine decrements hintsLeft and marks
+  // hinted squares; the search may be async and republishes via the bridge).
+  showHint() {
+    if (!cave) return;
+    if (!cave.readyForInput || (cave.currentStateObject?.hintsLeft ?? 0) <= 0) return;
+    cave.calcShowHint();
+    get().publish();
+  },
+
+  // Replay after game over: drop the current cave and re-run init (init re-reads the viewport).
+  async restart() {
+    cave = null;
+    set({ status: 'idle', error: null, snapshot: null });
+    await get().init({});
   },
 }));

@@ -79,6 +79,10 @@ export default class Cave {
   // Input actions allowed
   readyForInput = false;
 
+  // Set once moves run out — surfaced in the snapshot so the view can show the game-over screen
+  // (the original triggered it imperatively via ui.gameOver()).
+  isGameOver = false;
+
   // Spellstone choice state. If null, not in choice. If in choice: { chosenSquare: <square>|null }
   spellstoneChoice = null;
 
@@ -113,6 +117,8 @@ export default class Cave {
   bonusData = {};
   // Currently typed word, formatted with colors if needed
   typedFormattedWord = '';
+  // Whether the currently typed word forms a valid (diggable) word — render-side mirror
+  typedWordValid = false;
 
   // Hinted word maps (see original docs)
   hintedWordMap = null;
@@ -722,6 +728,9 @@ export default class Cave {
     let tokenList = this.typedWordSquares.map(sq => sq.getToken());
     let validWordTokens = this.languageTree.getValidWildcardWordFromTokenList(tokenList);
     let valid = !!validWordTokens;
+    // Surface validity to the view (the dig button enables on a valid word). The engine still
+    // re-checks per-square in digWord(); this is the render-side mirror.
+    this.typedWordValid = valid;
     if (GameManager.Debug && this.typedWordSquares.length)
       console.log(this.typedWordSquares.map(sq => sq.getToken()).join('-'), '->', validWordTokens);
 
@@ -1420,6 +1429,7 @@ export default class Cave {
   }
 
   gameOver() {
+    this.isGameOver = true;
     this.removeSavedState(this.caveName);
     this.readyForInput = false;
     this.ui.gameOver();
@@ -1600,6 +1610,7 @@ export default class Cave {
       currentLevel: this.currentLevel,
       hasTopLine: this.hasTopLine,
       readyForInput: this.readyForInput,
+      gameOver: !!this.isGameOver,
       spellstoneChoiceActive: !!this.spellstoneChoice,
       movesLeft: this.currentStateObject?.movesLeft,
       hintsLeft: this.currentStateObject?.hintsLeft,
@@ -1610,6 +1621,7 @@ export default class Cave {
       typedWord: {
         serialized: this.typedWordSerializedSquares ?? '',
         formatted: this.typedFormattedWord ?? '',
+        valid: !!this.typedWordValid,
         keys: this.typedWordSquares.map(sq => sq.serializedRowColumn),
         bonus: { ...this.bonusData },
       },

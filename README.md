@@ -6,20 +6,33 @@ The game renders as DOM + CSS (mask-image tints, transforms, Web Animations API)
 
 ## Status
 
-Phases 1–3 complete — the engine is ported and Phaser-free, and a Zustand store now drives a live
-(provisional) React view from engine snapshots in the browser.
+Phases 1–4 complete — the engine is ported and Phaser-free, a Zustand store drives the view from
+engine snapshots, and the cave now renders with faithful CSS-masked sprite components (squares,
+connector path, level lines, dig/hint/spellstone buttons, game-over screen).
 
 - `src/store/` — **(Phase 3)** the Zustand bridge replacing the Phaser EventBus. `gameStore.js`
   boots the engine in the browser (loads language data over `fetch`, sizes the 7-column grid to the
-  viewport, constructs the `Cave` with `window.localStorage` and a real `ui`), holds the immutable
-  `snapshot`, and exposes intents (`tapSquare`, `clearSelection`) that call the engine then
-  republish. `uiBridge.js` is the object installed as `cave.ui` (replacing the engine's internal
-  no-op proxy): a recursive proxy that absorbs the engine's imperative view calls and coalesces them
-  into one snapshot publish per microtask, covering the async engine→view flows.
-- `src/App.jsx` — **(Phase 3)** a provisional React view: boots the store on mount and renders the
-  generated cave (positioned `<div>`s, level lines, HUD) straight from `snapshot`; tapping a square
-  routes an intent back through the store. Plain inline styles — the faithful CSS-masked components
-  move to `src/view/` in Phase 4.
+  viewport, constructs the `Cave` with `window.localStorage` and a real `ui`, and runs `startGame()`
+  so the available-words search runs and `readyForInput` flips), holds the immutable `snapshot`, and
+  exposes intents (`tapSquare`, `clearSelection`, `digWord`, `showHint`, `restart`) that call the
+  engine then republish. `uiBridge.js` is the object installed as `cave.ui` (replacing the engine's
+  internal no-op proxy): a recursive proxy that absorbs the engine's imperative view calls and
+  coalesces them into one snapshot publish per microtask, covering the async engine→view flows.
+- `src/view/` — **(Phase 4)** the faithful DOM/CSS view, driven entirely by the snapshot:
+  - `Sprite.jsx` — the CSS-mask tint primitive (`mask-image` PNG + `background-color`, replacing
+    Phaser `setTint`) and `ColoredText` (per-character `{COLOR=n}` coloring via
+    `GameManager.parseColorTags`, replacing `setCharacterTint`).
+  - `Square.jsx` — one cell: tinted `squareBg3.png`, the token glyph, the selected outline + scale.
+  - `Connectors.jsx` — the selection/hint "tunnel" path (line segments, dots, diagonal-lead corner
+    pieces) computed from grid-center geometry.
+  - `LevelLines.jsx` — depth/level boundary bars with dug-column overlays.
+  - `Chrome.jsx` — the fixed UI: depth/level stats, the typed-word + bonus message, and the bottom
+    dig / hint / spellstone button bar (positions from the `*GridRatio` constants).
+  - `GameOver.jsx` — skull + stats + replay overlay (shown on the snapshot's `gameOver`).
+  - `CaveView.jsx` — composes the scrolling cave + chrome + overlay.
+- `src/App.jsx` — boots the store on mount and renders `CaveView`.
+- Fonts: Pathway Gothic One (the `SquareToken` grid/word font) and Poppins (the Daikon-Medium
+  `UIText` substitute) load as web fonts via `index.html`.
 - `src/engine/` — pure-logic engine + de-Phasered model, ported from the Phaser repo:
   - `LanguageTree.js`, `HashManager.js`, `CaveData.js` — copied verbatim.
   - `GameConstants.js` — Phaser `Color.ValueToColor(...)` objects rewritten as CSS hex strings.
@@ -39,20 +52,17 @@ Phases 1–3 complete — the engine is ported and Phaser-free, and a Zustand st
   - `LanguageTree.js` — its Node-only `fs/promises` use (offline reads + dev tree export) is now a
     lazy dynamic import, so the engine bundles cleanly for the browser (the browser only runs the
     `fetch` path).
-- `src/view/` — empty until Phase 4 (the provisional view currently lives in `App.jsx`).
-
 **Deferred on purpose** (tracked in the migration plan): raw pointer/wheel input + swipe
-hit-testing → Phase 5; CSS-masked sprite rendering + tweens → Phase 4/6; `{COLOR=n}` word
-styling → Phase 4.
+hit-testing → Phase 5; sprite enter/exit/scale tweens → Phase 6; the spellstone-placement and
+in-progress score/message animations → Phase 5/6.
 
-**Next: Phase 4 — view components.** Replace the provisional `App.jsx` rendering with real
-`<Square>` / `<Connector>` / UI-screen components as CSS-masked DOM in `src/view/`, plus `{COLOR=n}`
-word styling.
+**Next: Phase 5 — input.** Add pointer/swipe drag-to-type and wheel/touch scrolling on top of the
+Phase 4 view (tap selection already works); wire the spellstone-placement flow.
 
 ## Scripts
 
 ```bash
-npm run dev       # Vite dev server (placeholder shell for now)
+npm run dev       # Vite dev server (live cave)
 npm run build     # production build
 npm run harness   # parity test (see below)
 ```
